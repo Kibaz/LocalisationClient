@@ -1,5 +1,6 @@
 package networking;
 
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.provider.ContactsContract;
@@ -42,24 +43,6 @@ public class Client {
         try {
             this.serverAddress = InetAddress.getByName(address);
         } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
-        configureMACAddress();
-    }
-
-    private void configureMACAddress()
-    {
-        try {
-            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-            while(interfaces.hasMoreElements())
-            {
-                NetworkInterface inf = interfaces.nextElement();
-                if(inf.getHardwareAddress() != null)
-                {
-                    macAddress = inf.getHardwareAddress().toString();
-                }
-            }
-        } catch (SocketException e) {
             e.printStackTrace();
         }
     }
@@ -171,6 +154,11 @@ public class Client {
     public String getMACAddress()
     {
         return macAddress;
+    }
+
+    public void setMACAddress(String address)
+    {
+        this.macAddress = address;
     }
 
 }
