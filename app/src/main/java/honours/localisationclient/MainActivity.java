@@ -16,8 +16,9 @@ import networking.Client;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
-    // Fields
-    private static final float ALPHA = 0.01f;
+    // Apply a noise threshold for the data to be sent
+    // This was taken from observed data
+    private static final float NOISE_THRESHOLD = 0.2f;
 
     // Views
     private GLView glView;
@@ -131,31 +132,52 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         switch (event.sensor.getType()) {
             // Retrieve linear acceleration values (i.e. acceleration minus gravity)
             case Sensor.TYPE_LINEAR_ACCELERATION:
-                linear_accel_vals = lowPassFilter(event.values.clone(), linear_accel_vals);
+                linear_accel_vals = lowPassFilter(event.values.clone(),linear_accel_vals);
 
                 // Convert the Android System coordinates to real world coordinates system
                 convertSystemCoordsToRealWorldCoords();
 
                 setText(earthAccel);
                 // If reasonable values have been obtained from the sensors
-                if (earthAccel[0] != 0 && earthAccel[1] != 0 && earthAccel[2] != 0) {
-                    // Send the acceleration values to the server for processing
-                    String message = "Acceleration:" + earthAccel[0] + "," + earthAccel[1] + "," + earthAccel[2] + "," + client.getMACAddress();
-                    client.setMessage(message); // Configure message to be sent
-                    client.send(); // Send message to the server
-                }
+                // Send the acceleration values to the server for processing
+                String message = "Acceleration;" + earthAccel[0] + "," + earthAccel[1] + "," + earthAccel[2] + "," + client.getMACAddress();
+                client.setMessage(message); // Configure message to be sent
+                client.send(); // Send message to the server
 
 
                 break;
             // Retrieve gravitational effect on each axis
             case Sensor.TYPE_GRAVITY:
-                gravity_values = lowPassFilter(event.values.clone(), gravity_values);
+                gravity_values[0] = event.values[0];
+                gravity_values[1] = event.values[1];
+                gravity_values[2] = event.values[2];
+                gravity_values[3] = 0;
                 break;
             // Retrieve magnetometer values on each axis - required for generating rotation matrix
             case Sensor.TYPE_MAGNETIC_FIELD:
-                magnetic_values = lowPassFilter(event.values.clone(),magnetic_values);
+                magnetic_values[0] = event.values[0];
+                magnetic_values[1] = event.values[1];
+                magnetic_values[2] = event.values[2];
+                magnetic_values[3] = 0;
                 break;
         }
+
+    }
+
+    private float[] lowPassFilter(float input[], float output[])
+    {
+        if(output == null)
+        {
+            return input;
+        }
+
+        for(int i = 0; i < input.length; i++)
+        {
+            output[i] = output[i] + NOISE_THRESHOLD * (input[i] - output[i]);
+        }
+
+        return output;
+
 
     }
 
@@ -171,25 +193,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // Multiply inverted rotation matrix with the acceleration values (without gravity)
         // Store this in an array of float values
         android.opengl.Matrix.multiplyMV(earthAccel, 0, inversion, 0, linear_accel_vals, 0);
-    }
-
-    /*
-     * Method to apply a low pass filter to the noisy data
-     * produced from the Android device's sensors
-     */
-    private float[] lowPassFilter(float[] input, float[] output)
-    {
-        if(output == null)
-        {
-            return input;
-        }
-
-        for(int i = 0; i < input.length; i++)
-        {
-            output[i] = output[i] + ALPHA * (input[i] - output[i]);
-        }
-
-        return output;
     }
 
     private void setDefaultAcceleration()
