@@ -11,6 +11,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 import networking.Client;
 
@@ -32,6 +36,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     // Networking
     private Client client;
+    private WifiManager wifiManager;
+    private Timer timer = new Timer();
 
     /*
      * Using Android's built-in accelerometer to acquire
@@ -101,6 +107,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         } else {
             Log.d("Error: ", "This Device does not support the gravity sensor");
         }
+
+        // Continuously scan wifi
+        timer.schedule(new TimerTask()
+        {
+            @Override
+            public void run() {
+                scanWifi();
+            }
+        },0,100);
+
     }
 
     private void initViews() {
@@ -121,9 +137,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         client.listen(); // Listen for UDP packets sent from server
 
         // Retrieve MAC Address from device
-        WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        if(!wifiManager.isWifiEnabled())
+        {
+            Toast.makeText(this,"WiFi is disabled ... We need to enable it",Toast.LENGTH_LONG).show();
+            wifiManager.setWifiEnabled(true);
+        }
         WifiInfo wifiInfo = wifiManager.getConnectionInfo();
         client.setMACAddress(wifiInfo.getMacAddress());
+    }
+
+    private void scanWifi()
+    {
+        wifiManager.startScan();
     }
 
     @Override
