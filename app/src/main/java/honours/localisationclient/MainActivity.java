@@ -140,13 +140,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // Text View Positioning using FrameLayout
         FrameLayout.LayoutParams locationParams = new FrameLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
                 RelativeLayout.LayoutParams.WRAP_CONTENT);
-        locationParams.leftMargin = 10;
-        locationParams.topMargin = 5;
+        locationParams.leftMargin = 10; // 10 pixels from left side
+        locationParams.topMargin = 5; // 5 pixels from top
         FrameLayout.LayoutParams numClientsParams = new FrameLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
                 RelativeLayout.LayoutParams.WRAP_CONTENT);
-        numClientsParams.leftMargin = 10;
-        numClientsParams.topMargin = 45;
-        
+        numClientsParams.leftMargin = 10; // 10 pixels from left side
+        // Configure top margin as an offset from location margin
+        numClientsParams.topMargin = (int) (locationParams.topMargin + location.getTextSize() + 5);
+
         // Add Text Views as overlay on OpenGL view
         addContentView(location, locationParams);
         addContentView(numClientsText, numClientsParams);
