@@ -1,6 +1,7 @@
 package honours.localisationclient;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -10,8 +11,14 @@ import android.net.wifi.WifiManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import org.w3c.dom.Text;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -26,13 +33,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     // Views
     private GLView glView;
-    private TextView accelX;
-    private TextView accelY;
-    private TextView accelZ;
 
-    private TextView rotX;
-    private TextView rotY;
-    private TextView rotZ;
+    private TextView location;
+    private TextView numClientsText;
 
     // Networking
     private Client client;
@@ -120,15 +123,34 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     private void initViews() {
+        // Initialise OpenGL View
         glView = (GLView) findViewById(R.id.glView);
-        // Acceleration text nodes
-        accelX = (TextView) findViewById(R.id.accelX);
-        accelY = (TextView) findViewById(R.id.accelY);
-        accelZ = (TextView) findViewById(R.id.accelZ);
 
-        rotX = (TextView) findViewById(R.id.rotX);
-        rotY = (TextView) findViewById(R.id.rotY);
-        rotZ = (TextView) findViewById(R.id.rotZ);
+        // Initialise all text views
+        location = new TextView(this);
+        location.setText("Location: ");
+        location.setTextColor(Color.WHITE);
+        location.setTextSize(20);
+
+        numClientsText = new TextView(this);
+        numClientsText.setText("People in area: ");
+        numClientsText.setTextColor(Color.WHITE);
+        numClientsText.setTextSize(20);
+
+        // Text View Positioning using FrameLayout
+        FrameLayout.LayoutParams locationParams = new FrameLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT);
+        locationParams.leftMargin = 10;
+        locationParams.topMargin = 5;
+        FrameLayout.LayoutParams numClientsParams = new FrameLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT);
+        numClientsParams.leftMargin = 10;
+        numClientsParams.topMargin = 45;
+        
+        // Add Text Views as overlay on OpenGL view
+        addContentView(location, locationParams);
+        addContentView(numClientsText, numClientsParams);
+
     }
 
     private void initClientInstance() {
@@ -162,14 +184,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
                 // Convert the Android System coordinates to real world coordinates system
                 convertSystemCoordsToRealWorldCoords();
-
-                setText(earthAccel);
+                /*
                 // If reasonable values have been obtained from the sensors
                 // Send the acceleration values to the server for processing
                 String message = "Acceleration;" + earthAccel[0] + "," + earthAccel[1] + "," + earthAccel[2] + "," + client.getMACAddress();
                 client.setMessage(message); // Configure message to be sent
                 client.send(); // Send message to the server
-
+                */
 
                 break;
             // Retrieve gravitational effect on each axis
@@ -219,27 +240,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // Multiply inverted rotation matrix with the acceleration values (without gravity)
         // Store this in an array of float values
         android.opengl.Matrix.multiplyMV(earthAccel, 0, inversion, 0, linear_accel_vals, 0);
-    }
-
-    private void setDefaultAcceleration()
-    {
-        accelX.setText("0.0");
-        accelY.setText("0.0");
-        accelZ.setText("0.0");
-    }
-
-    private void setText(float[] vals)
-    {
-        accelX.setText(Float.toString(vals[0]));
-        accelY.setText(Float.toString(vals[1]));
-        accelZ.setText(Float.toString(vals[2]));
-    }
-
-    private void displayAccelerationValues()
-    {
-        accelX.setText(Float.toString(deltaX));
-        accelY.setText(Float.toString(deltaY));
-        accelZ.setText(Float.toString(deltaZ));
     }
 
     @Override

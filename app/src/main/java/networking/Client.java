@@ -102,6 +102,11 @@ public class Client {
         }
     }
 
+    private void processLocationData()
+    {
+
+    }
+
     /*
      * Method for sending bytes of data
      * To the localisation server

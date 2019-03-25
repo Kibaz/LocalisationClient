@@ -13,7 +13,7 @@ import javax.microedition.khronos.opengles.GL10;
 public class GLRenderer implements GLSurfaceView.Renderer{
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-        GLES20.glClearColor(1f,0,0,1f);
+        GLES20.glClearColor(0,0.5f,0.5f,1f);
     }
 
     @Override
