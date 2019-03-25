@@ -6,11 +6,16 @@ import android.opengl.GLSurfaceView;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import objects.Circle;
+
 /**
  * Created by Marcus on 07/02/2019.
  */
 
 public class GLRenderer implements GLSurfaceView.Renderer{
+
+    private float aspectRatio = 0;
+
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
         GLES20.glClearColor(0,0.5f,0.5f,1f);
@@ -18,11 +23,13 @@ public class GLRenderer implements GLSurfaceView.Renderer{
 
     @Override
     public void onSurfaceChanged(GL10 gl, int width, int height) {
-
+        aspectRatio = (float) width / (float) height;
     }
 
     @Override
     public void onDrawFrame(GL10 gl) {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+        Circle circle = new Circle(0.5f,0,0,20,1/aspectRatio);
+        circle.draw(gl);
     }
 }
