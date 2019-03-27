@@ -1,5 +1,6 @@
 package rendering;
 
+import objects.Camera;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.util.Log;
@@ -11,6 +12,7 @@ import honours.localisationclient.MainActivity;
 import objects.Circle;
 import rendering.Loader;
 import shaders.BasicShader;
+import utils.Maths;
 
 /**
  * Created by Marcus on 07/02/2019.
@@ -20,6 +22,12 @@ public class GLRenderer implements GLSurfaceView.Renderer{
 
     private BasicShader shader;
     private Circle circle;
+    private Camera camera;
+
+    public GLRenderer(Camera camera)
+    {
+        this.camera = camera;
+    }
 
     // Fields
     private float aspectRatio = 0; // Retain aspect ratio of device
@@ -41,6 +49,7 @@ public class GLRenderer implements GLSurfaceView.Renderer{
     public void onDrawFrame(GL10 gl) {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
         shader.start();
+        shader.loadViewMatrix(Maths.createViewMatrix(camera));
         circle.draw(shader,1/aspectRatio);
         shader.stop();
     }

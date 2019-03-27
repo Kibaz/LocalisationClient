@@ -10,6 +10,7 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
@@ -67,11 +68,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private float[] earthAccel = new float[4];
 
+
+    public static float screenDensity;
+
     // Activity initialisation method
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        screenDensity = displayMetrics.density;
+
         // Initialise views
         initViews();
 
