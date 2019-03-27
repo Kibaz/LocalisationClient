@@ -19,12 +19,14 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import networking.Client;
+import shaders.BasicShader;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
     // Apply a noise threshold for the data to be sent
     // This was taken from observed data
     private static final float NOISE_THRESHOLD = 0.2f;
+    public static Context context;
 
     // Views
     private GLView glView;
@@ -76,6 +78,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // Initialise client networking operations
         initClientInstance();
 
+        context = this;
+
+        //GLRenderer.shader = new BasicShader(this);
 
         // Initialise built-in sensor
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);

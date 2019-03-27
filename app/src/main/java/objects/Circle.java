@@ -1,6 +1,8 @@
 package objects;
 
+import android.opengl.GLES11;
 import android.opengl.GLES20;
+import android.opengl.GLES30;
 import android.util.Log;
 
 import java.nio.ByteBuffer;
@@ -14,6 +16,8 @@ import javax.microedition.khronos.opengles.GL10;
 import javax.microedition.khronos.opengles.GL11;
 
 import honours.localisationclient.GLView;
+import shaders.BasicShader;
+import utils.Maths;
 
 /**
  * Created by Marcus on 25/03/2019.
@@ -25,29 +29,43 @@ public class Circle {
     private float radius;
     private float x; // Center X
     private float y; // Center Y
-    private float x_scale;
+    private int segments;
 
     private float[] vertices;
     private int[] indices;
+    private float[] colour;
+
+    private Model model;
 
     // Constructor
-    public Circle(float radius, float x, float y, int segments,float x_scale)
+    public Circle(float radius, float x, float y, int segments)
     {
         this.radius = radius;
         this.x = x;
         this.y = y;
-        this.x_scale = x_scale;
+        this.segments = segments;
         constructCircle(segments);
+        colour = new float[3];
     }
 
-    private void constructCircle(int segments)
+    public float[] getVertices()
+    {
+        return vertices;
+    }
+
+    public void setModel(Model model)
+    {
+        this.model = model;
+    }
+
+    public void constructCircle(int segments)
     {
         List<Float> verts = new ArrayList<>();
 
         float increment = (float) (2.0f * Math.PI / segments);
         for(float angle = 0.0f; angle <= 2.0f * Math.PI; angle+= increment)
         {
-            verts.add((float)(x_scale * radius * Math.cos(angle)));
+            verts.add((float)(radius * Math.cos(angle)));
             verts.add((float)(radius * Math.sin(angle)));
             verts.add(0f);
         }
@@ -64,6 +82,7 @@ public class Circle {
     {
         FloatBuffer vertexBuffer;
         IntBuffer indicesBuffer;
+
 
 
         ByteBuffer byteBuffer = ByteBuffer.allocateDirect(vertices.length * 4);
@@ -87,5 +106,25 @@ public class Circle {
         gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
 
 
+
+
+    }
+
+    public void draw(BasicShader shader,float x_scale)
+    {
+        GLES30.glBindVertexArray(model.getID());
+        GLES20.glEnableVertexAttribArray(0);
+        prepare(shader,x_scale);
+        GLES11.glDrawArrays(GLES11.GL_TRIANGLE_FAN,0,model.getVertexCount());
+        GLES20.glDisableVertexAttribArray(0);
+        GLES30.glBindVertexArray(0);
+        shader.stop();
+    }
+
+    private void prepare(BasicShader shader,float x_scale)
+    {
+        shader.loadTransformationMatrix(Maths.createTransformationMatrix(this.x,this.y,0,0,0,0,x_scale,1,1));
+        shader.loadColour(colour);
+        shader.loadOpacity(0);
     }
 }
