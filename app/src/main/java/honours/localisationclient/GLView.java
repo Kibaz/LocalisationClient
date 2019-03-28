@@ -3,16 +3,11 @@ package honours.localisationclient;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.MotionEvent;
-import android.view.ScaleGestureDetector;
 import android.view.View;
 
 import objects.Camera;
 import rendering.GLRenderer;
-
-import static android.view.ScaleGestureDetector.*;
 
 /**
  * Created by Marcus on 07/02/2019.
@@ -42,10 +37,12 @@ public class GLView extends GLSurfaceView implements View.OnTouchListener{
         camera = new Camera();
         setRenderer(new GLRenderer(camera));
         setOnTouchListener(this);
+
     }
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
+
         if(event != null)
         {
             float x = event.getX();

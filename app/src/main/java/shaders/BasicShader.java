@@ -16,6 +16,7 @@ public class BasicShader extends ShaderProgram {
     // Define uniform locations to be registered by teh GLSL shader program
     private int location_transformationMatrix;
     private int location_viewMatrix;
+    private int location_projectionMatrix;
     private int location_colour;
     private int location_opacity;
 
@@ -32,6 +33,7 @@ public class BasicShader extends ShaderProgram {
     protected void getAllUniformLocations() {
         location_transformationMatrix = super.getUniformLocation("transformationMatrix");
         location_viewMatrix = super.getUniformLocation("viewMatrix");
+        location_projectionMatrix = super.getUniformLocation("projectionMatrix");
         location_colour = super.getUniformLocation("colour");
         location_opacity = super.getUniformLocation("opacity");
     }
@@ -49,6 +51,11 @@ public class BasicShader extends ShaderProgram {
     public void loadViewMatrix(float[] matrix)
     {
         super.loadMatrix(location_viewMatrix,matrix);
+    }
+
+    public void loadProjectionMatrix(float[] matrix)
+    {
+        super.loadMatrix(location_projectionMatrix,matrix);
     }
 
     public void loadOpacity(float opacity)

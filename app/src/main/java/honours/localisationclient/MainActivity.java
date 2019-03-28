@@ -1,17 +1,22 @@
 package honours.localisationclient;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -20,7 +25,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import networking.Client;
-import shaders.BasicShader;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
@@ -32,6 +36,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     // Views
     private GLView glView;
 
+    // Text Views
     private TextView location;
     private TextView numClientsText;
 
@@ -71,6 +76,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     public static float screenDensity;
 
+    public static final float ZOOM_FACTOR = 5;
+    public static float zoom = 10;
+
     // Activity initialisation method
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,13 +89,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         screenDensity = displayMetrics.density;
 
+        context = this;
+
         // Initialise views
         initViews();
 
         // Initialise client networking operations
         initClientInstance();
-
-        context = this;
 
         //GLRenderer.shader = new BasicShader(this);
 
@@ -160,6 +168,28 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // Add Text Views as overlay on OpenGL view
         addContentView(location, locationParams);
         addContentView(numClientsText, numClientsParams);
+
+        // Handle button listeners
+        FloatingActionButton zoomIn = (FloatingActionButton) findViewById(R.id.zoomIn);
+        zoomIn.setBackgroundTintList(ColorStateList.valueOf(Color.GRAY));
+        zoomIn.setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View v) {
+                zoom -= ZOOM_FACTOR;
+            }
+        });
+
+
+        FloatingActionButton zoomOut = (FloatingActionButton) findViewById(R.id.zoomOut);
+        zoomOut.setBackgroundTintList(ColorStateList.valueOf(Color.GRAY));
+        zoomOut.setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View v) {
+                zoom += ZOOM_FACTOR;
+            }
+        });
 
     }
 

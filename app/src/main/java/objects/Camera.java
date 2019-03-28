@@ -13,12 +13,30 @@ public class Camera {
     private float yaw = 0;
     private float roll;
 
-    private float zoom = 20;
+    private float zoom = 5;
 
     // Constructor
     public Camera()
     {
         position = new float[3]; // X, Y, Z
+        position[2] = zoom;
+    }
+
+    public void setZoom(float zoom)
+    {
+        this.zoom = zoom;
+    }
+
+    public void zoom()
+    {
+        if(position[2] < zoom)
+        {
+            position[2] += 0.5f;
+        }
+        else if(position[2] > zoom)
+        {
+            position[2] -= 0.5f;
+        }
     }
 
     // Getters and Setters
