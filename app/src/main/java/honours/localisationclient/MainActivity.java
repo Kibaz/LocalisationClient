@@ -76,8 +76,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     public static float screenDensity;
 
-    public static final float ZOOM_FACTOR = 5;
-    public static float zoom = 10;
+    private static final float ZOOM_UPPER_LIMIT = 30; // Camera positioned at 0
+    private static final float ZOOM_LOWER_LIMIT = 0;
+    public static final float ZOOM_FACTOR = 2;
+    public static float zoom = 5;
 
     // Activity initialisation method
     @Override
@@ -176,7 +178,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
             @Override
             public void onClick(View v) {
-                zoom -= ZOOM_FACTOR;
+                if(zoom - ZOOM_FACTOR > ZOOM_LOWER_LIMIT) {
+                    zoom -= ZOOM_FACTOR;
+                }
             }
         });
 
@@ -187,7 +191,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
             @Override
             public void onClick(View v) {
-                zoom += ZOOM_FACTOR;
+                if(zoom + ZOOM_FACTOR < ZOOM_UPPER_LIMIT)
+                {
+                    zoom += ZOOM_FACTOR;
+                }
+
             }
         });
 

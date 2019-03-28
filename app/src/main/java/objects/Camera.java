@@ -1,5 +1,13 @@
 package objects;
 
+import android.util.Log;
+
+import java.util.Timer;
+import java.util.TimerTask;
+
+import honours.localisationclient.MainActivity;
+import rendering.GLRenderer;
+
 /**
  * Created by Marcus on 27/03/2019.
  */
@@ -15,6 +23,8 @@ public class Camera {
 
     private float zoom = 5;
 
+    private float time = 0;
+
     // Constructor
     public Camera()
     {
@@ -29,13 +39,9 @@ public class Camera {
 
     public void zoom()
     {
-        if(position[2] < zoom)
+        if((int) position[2] != (int) zoom)
         {
-            position[2] += 0.5f;
-        }
-        else if(position[2] > zoom)
-        {
-            position[2] -= 0.5f;
+            position[2] += (zoom-position[2]) * GLRenderer.getDeltaTime() * 2.0f;
         }
     }
 

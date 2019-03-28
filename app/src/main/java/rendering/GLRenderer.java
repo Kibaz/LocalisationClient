@@ -31,8 +31,11 @@ public class GLRenderer implements GLSurfaceView.Renderer{
     // Fields
     private BasicShader shader;
     private Circle circle;
-    private Square square;
+    private Square redZone;
     private Camera camera;
+
+    private long lastTimeStamp;
+    private static float deltaTime;
 
     private float[] projectionMatrix;
 
@@ -48,18 +51,20 @@ public class GLRenderer implements GLSurfaceView.Renderer{
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
         GLES20.glClearColor(0,0.5f,0.5f,1f);
         shader = new BasicShader(MainActivity.context);
-        circle = new Circle(0.5f,0,0,20);
+        circle = new Circle(0.05f,0,0,20);
         float [] verts = {
-                -0.5f, 0.5f, 0f,
-                -0.5f, -0.5f, 0f,
-                0.5f, -0.5f, 0f,
-                0.5f, -0.5f, 0f,
-                0.5f, 0.5f, 0f,
-                -0.5f, 0.5f, 0f
+                -1f, 1f, 0f,
+                -1f, 0f, 0f,
+                1f, 0f, 0f,
+                1f, 0f, 0f,
+                1f, 1f, 0f,
+                -1f, 1f, 0f
         };
-        square = new Square(0,0,0,verts);
-        square.setModel(Loader.loadToVAO(square.getVertices()));
+        redZone = new Square(0,0,0,verts);
+        redZone.setModel(Loader.loadToVAO(redZone.getVertices()));
         circle.setModel(Loader.loadToVAO(circle.getVertices()));
+
+        lastTimeStamp = System.currentTimeMillis();
     }
 
     @Override
@@ -79,9 +84,10 @@ public class GLRenderer implements GLSurfaceView.Renderer{
         shader.start();
         shader.loadViewMatrix(Maths.createViewMatrix(camera));
         circle.draw(shader);
-        square.draw(shader);
-        square.setColour(1,0,0);
+        redZone.draw(shader);
+        redZone.setColour(1,0,0);
         shader.stop();
+        update();
     }
 
 
@@ -99,5 +105,17 @@ public class GLRenderer implements GLSurfaceView.Renderer{
         projectionMatrix[11] = -1;
         projectionMatrix[14] = - ((2 * NEAR_PLANE * FAR_PLANE)/frustum_lngth);
         projectionMatrix[15] = 0;
+    }
+
+    public static float getDeltaTime()
+    {
+        return deltaTime;
+    }
+
+    private void update()
+    {
+        long currentTime = System.currentTimeMillis();
+        deltaTime = (float) (currentTime - lastTimeStamp) / 1000;
+        lastTimeStamp = currentTime;
     }
 }
