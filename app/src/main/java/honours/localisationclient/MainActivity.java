@@ -3,15 +3,14 @@ package honours.localisationclient;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -23,8 +22,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 import java.util.Timer;
 import java.util.TimerTask;
+import android.os.Handler;
 
 import networking.Client;
+import networking.PeerManager;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
@@ -81,6 +82,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public static final float ZOOM_FACTOR = 2;
     public static float zoom = 5;
 
+    private Handler handler;
+
     // Activity initialisation method
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,6 +95,17 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         screenDensity = displayMetrics.density;
 
         context = this;
+
+        handler = new Handler(){
+            @Override
+            public void handleMessage(Message msg)
+            {
+                if(msg.what == 1)
+                {
+                    update();
+                }
+            }
+        };
 
         // Initialise views
         initViews();
@@ -147,11 +161,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         // Initialise all text views
         location = new TextView(this);
+        location.setId(R.id.locationText);
         location.setText("Location: ");
         location.setTextColor(Color.WHITE);
         location.setTextSize(20);
 
         numClientsText = new TextView(this);
+        numClientsText.setId(R.id.numClientsText);
         numClientsText.setText("People in area: ");
         numClientsText.setTextColor(Color.WHITE);
         numClientsText.setTextSize(20);
@@ -203,7 +219,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private void initClientInstance() {
         // Create client instance for communication with the localisation server
-        client = new Client(8127, "192.168.1.7");
+        client = new Client(8127, "192.168.1.7",handler);
         client.listen(); // Listen for UDP packets sent from server
 
         // Retrieve MAC Address from device
@@ -215,11 +231,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
         WifiInfo wifiInfo = wifiManager.getConnectionInfo();
         client.setMACAddress(wifiInfo.getMacAddress());
+
+        client.setMessage("Connecting " + client.getMACAddress());
+        client.send();
     }
 
     private void scanWifi()
     {
         wifiManager.startScan();
+    }
+
+    private void update()
+    {
+        location.setText("Location " + Client.locationX + "," + Client.locationY);
+        int numClients = (Client.pointer != null) ? PeerManager.getPeersDevices().size() + 1 : PeerManager.getPeersDevices().size();
+        numClientsText.setText("People in area: " + numClients);
     }
 
     @Override

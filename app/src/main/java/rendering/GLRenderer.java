@@ -1,5 +1,9 @@
 package rendering;
 
+import database.Models;
+import networking.Client;
+import networking.PeerDevice;
+import networking.PeerManager;
 import objects.Camera;
 
 import android.opengl.GLES11;
@@ -62,8 +66,17 @@ public class GLRenderer implements GLSurfaceView.Renderer{
         };
         redZone = new Square(0,0,0,verts);
         redZone.setModel(Loader.loadToVAO(redZone.getVertices()));
-        circle.setModel(Loader.loadToVAO(circle.getVertices()));
-
+        circle.setModel(Models.circle);
+        Models.circle = Loader.loadToVAO(circle.getVertices());
+        for(String macAddress: PeerManager.getPeersDevices().keySet())
+        {
+            PeerDevice device = PeerManager.getPeersDevices().get(macAddress);
+            device.getPointer().setModel(Models.circle);
+        }
+        if(Client.pointer != null)
+        {
+            Client.pointer.setModel(Models.circle);
+        }
         lastTimeStamp = System.currentTimeMillis();
     }
 
@@ -83,7 +96,16 @@ public class GLRenderer implements GLSurfaceView.Renderer{
         camera.zoom();
         shader.start();
         shader.loadViewMatrix(Maths.createViewMatrix(camera));
-        circle.draw(shader);
+        for(String macAddress: PeerManager.getPeersDevices().keySet())
+        {
+            PeerDevice device = PeerManager.getPeersDevices().get(macAddress);
+            device.getPointer().draw(shader);
+        }
+        if(Client.pointer != null)
+        {
+            Client.pointer.draw(shader);
+        }
+        //circle.draw(shader);
         redZone.draw(shader);
         redZone.setColour(1,0,0);
         shader.stop();

@@ -1,19 +1,20 @@
 package networking;
 
-import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.provider.ContactsContract;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.Enumeration;
+
+import database.Models;
+import objects.Circle;
 
 /**
  * Created by Marcus on 07/02/2019.
@@ -36,15 +37,24 @@ public class Client {
 
     private String macAddress;
 
+    public static float locationX;
+    public static float locationY;
+
+    public static Circle pointer;
+
+    private Handler handler;
+
     // Constructor
-    public Client(int port, String address)
+    public Client(int port, String address, Handler handler)
     {
+        this.handler = handler;
         this.serverPort = port;
         try {
             this.serverAddress = InetAddress.getByName(address);
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
+
     }
 
 
@@ -74,7 +84,8 @@ public class Client {
                             DatagramPacket packet = new DatagramPacket(buffer,buffer.length);
                             socket.receive(packet);
                             String message = new String(packet.getData(),0,packet.getLength());
-                            Log.d("Message", message);
+                            //Log.d("Message",message);
+                            processLocationData(message);
                         }
                     } catch(IOException e)
                     {
@@ -102,8 +113,48 @@ public class Client {
         }
     }
 
-    private void processLocationData()
+    private void processLocationData(String message)
     {
+        if(!message.contains("New location"))
+        {
+            return;
+        }
+
+        String strData = message.split(" ")[2]; // Remove header
+        String[] values = strData.split(",");
+
+        float posX = Float.parseFloat(values[0]);
+        float posY = Float.parseFloat(values[1]);
+        String macAddress = values[2];
+
+        // Check whether the location corresponds to the local device or not
+        // Ensure string formatting is in the same format i.e. both lower case
+        if(macAddress.toLowerCase().equals(this.macAddress.toLowerCase()))
+        {
+            // Set location of this device
+            locationX = posX;
+            locationY = posY;
+            if(pointer == null) {
+                pointer = new Circle(0.05f, locationX, locationY, 20);
+                pointer.setModel(Models.circle);
+                pointer.setColour(0,0,1);
+                Message threadMsg = new Message();
+                threadMsg.what = 1;
+                handler.sendMessage(threadMsg);
+                return;
+            }
+            pointer.setX(locationX);
+            pointer.setY(locationY);
+            Message threadMsg = new Message();
+            threadMsg.what = 1;
+            handler.sendMessage(threadMsg);
+            return;
+        }
+
+        PeerDevice peer = new PeerDevice(macAddress,posX,posY);
+        PeerManager.registerOrUpdatePeerDevice(peer);
+
+
 
     }
 
